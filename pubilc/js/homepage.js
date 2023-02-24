@@ -25,8 +25,7 @@ const phoneNumber2 = document.getElementById('phone2')
 const phErr = document.getElementById('phErr')
 
 const email = document.getElementById('email')
-const errmE = document.getElementById('errmE')
-const anconEmail = document.getElementById('anconEmail')
+const Emloder = document.getElementById('Emloder')
 
 const password = document.getElementById('password')
 const Cpassword = document.getElementById('passwordC')
@@ -45,7 +44,7 @@ const populateFilds = async ()=>{
      proPic.hidden = true
      proann.hidden = false
      const {data}= await axios.post('get/pro')
-     proPic.src = `${data.imgfile.url}`
+     proPic.src = `${data.imgPublicKey}`
      proann.hidden = true
      proPic.hidden = false
 }
@@ -137,18 +136,15 @@ const varinput = (arry, Idob, IhomeNo, Ikebela, IphoneNumber1, IphoneNumber2, If
 
 const Varemail = async (to = "S") =>{
      if (to == "S") {
-          console.log("asdfasdf");
 
-          anconEmail.hidden = false
+          Emloder.hidden = false
           const {data: data1} = await axios.post('get/staff', {
                email: email.value
           })
           const {data: data2} = await axios.post('get/driver',{
                email: email.value
           })
-          console.log(data1, data2);
-     
-          anconEmail.hidden = true
+          Emloder.hidden = true
           if(data1.length != 0 || data2.length != 0){
                alert('Email is already in use')
                console.log(data1, data2, "innn");
@@ -173,6 +169,7 @@ const Varemail = async (to = "S") =>{
                return false
           }
      }else{
+          DEmloder.hidden = false
           const {data: data1} = await axios.post('get/staff', {
                email: Demail.value
           })
@@ -180,10 +177,11 @@ const Varemail = async (to = "S") =>{
           const {data: data2} = await axios.post('get/driver',{
                email: Demail.value
           })
-          
+          DEmloder.hidden = true
           if(data1.length != 0 || data2.length != 0){
                console.log(data2);
                alert('Email is already in use')
+               DEmloder.hidden = true
                return false
           }
      }
@@ -196,7 +194,7 @@ Register.addEventListener('click', async ()=>{
      const vari = varinput(info, Dob, HomeNo, kebela, phoneNumber1, phoneNumber2, filePhate)
      if(vari){
           const vare = await Varemail()
-          if(vare){        
+          if(vare){      
                const returnData = await axios.post('/Register/staff',{
                     data:{
                          firstName:Fname.value,
@@ -241,11 +239,13 @@ const DphoneNumber1 = document.getElementById('Dphone')
 const DphoneNumber2 = document.getElementById('Dphone2')
 
 const Demail = document.getElementById('Demail')
+const DEmloder = document.getElementById('DEmloder')
 const Dpassword = document.getElementById('Dpassword')
 const DCpassword = document.getElementById('DpasswordC')
 
 const car = document.getElementById('car')
 const Dmodel = document.getElementById('Dmodel')
+const Mloder = document.getElementById('Mloder')
 
 
 const DRegister = document.getElementById('Dreg')
@@ -279,15 +279,19 @@ carNameP()
 const modelNameP = async()=>{
 
      if(car.value != ''){
+          Mloder.hidden = false
           const {data} = await axios.post('/get/car',{
                name: car.value,
                instock: {'$gt':0}
           })
-          var html2 = ''
-          for (let index = 0; index < data.length; index++) {
-               html2 += `<option>${data[index].model}</option>`;
-          }
-          Dmodel.innerHTML = html2
+          setTimeout(() => {
+               Mloder.hidden = true
+               var html2 = ''
+               for (let index = 0; index < data.length; index++) {
+                    html2 += `<option>${data[index].model}</option>`;
+               }
+               Dmodel.innerHTML = html2
+          }, 3000);
      }else{
           Dmodel.innerHTML = "no models"
      }
@@ -343,8 +347,10 @@ const quan = document.getElementById('quan')
 
 const EMmodel = document.getElementById('EMmodel')
 const EMIVmodel = document.getElementById('EMIVmodel')
+
 const EMmin = document.getElementById('EMmin')
 const EMmax = document.getElementById('EMmax')
+const MAloder = document.getElementById('MAloder')
 const EMquan = document.getElementById('EMquan')
 const gErr = document.getElementById('gErr')
 
@@ -432,10 +438,12 @@ Cname.addEventListener('keyup', async()=>{
 
 model.addEventListener('keyup', async()=>{
      if (Cname.value) {
+          MAloder.hidden = false
           const data = await axios.post('/get/car',{
                name:Cname.value,
                model:model.value
           })
+          MAloder.hidden = true
           if(data.data.length > 0){
                max.disabled = true
                min.disabled = true
@@ -671,15 +679,8 @@ const populat = async()=>{
                     EsubCity.value = data.data[0].subcity
                     EphoneNumber1.value = data.data[0].phoneNumber1
                     EphoneNumber2.value = data.data[0].phoneNumber2
-                    console.log(data.data[0]._id);
-                    await axios.post('get/img?for=staff',{
-                         _id: data.data[0]._id
-                    }).then((data)=>{
-                         userpic.src = `${data.data.url}`
-                         userpic.hidden = false
-                    }).catch((err)=>{
-                         console.log(err);
-                    })
+                    userpic.src = `${data.data[0].imgPublicKey}`
+                    userpic.hidden = false
                }else{
                     alert("user not found")
                }
@@ -699,15 +700,8 @@ const populat = async()=>{
                EsubCity.value = data.data[0].subcity
                EphoneNumber1.value = data.data[0].phoneNumber1
                EphoneNumber2.value = data.data[0].phoneNumber2
-               console.log( data.data[0]._id)
-               await axios.post('get/img?for=dirver',{
-                    _id: data.data[0]._id
-               }).then((data)=>{
-                    userpic.src = `${data.data.url}`
-                    userpic.hidden = false
-               }).catch((err)=>{
-                    console.log(err);
-               })
+               userpic.src = `${data.data[0].imgPublicKey}`
+               userpic.hidden = false
                await axios.post('get/car', {
                     _id: data.data[0].carAs
                }).then(async (data)=>{
@@ -729,7 +723,7 @@ search.addEventListener('click', ()=>{
      if(searchValue.value){
           populat()
      }else{
-          alert("search")
+          alert("Enter in search propt")
      }
 })
 
@@ -785,7 +779,7 @@ Eregister.addEventListener('click', async ()=>{
                               _id: searchValue.value
                          }
                     }).then(()=>{
-                         console.log("user edited")
+                         alert("user edited")
                     }).catch((err)=>{
                          console.log(err);
                     })
@@ -809,7 +803,7 @@ Eregister.addEventListener('click', async ()=>{
                          }
 
                     }).then(()=>{
-                         console.log("driver edited")
+                         alert("driver edited")
                     }).catch((err)=>{
                          console.log(err);
                     }) 
@@ -817,6 +811,214 @@ Eregister.addEventListener('click', async ()=>{
           }
      }
 })
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//edit car/////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+const CEserchinput = document.getElementById('CEserchinput')
+const CEbutton = document.getElementById('CEbutton-addon2')
+
+const CEname = document.getElementById('CEname')
+const CEmodel = document.getElementById('CEmodel')
+const CEmax = document.getElementById('CEmax')
+const CEmin = document.getElementById('CEmin')
+
+const CEquan = document.getElementById('CEquan')
+
+const CEEMmodel = document.getElementById('CEEMmodel')
+const CEEMIVmodel = document.getElementById('CEEMIVmodel')
+
+const CEEMmin = document.getElementById('CEEMmin')
+const CEEMmax = document.getElementById('CEEMmax')
+const CEMAloder = document.getElementById('CEMAloder')
+const CEEMquan = document.getElementById('CEEMquan')
+const CEgErr = document.getElementById('CEgErr')
+
+const CECregister = document.getElementById('CECreg')
+const CECcancel = document.getElementById('CECcan')
+
+
+const CEtypeCastCheck = (arry, Imodel, Imax, Imin, Iquan)=>{
+     for (let index = 0; index < arry.length; index++) {
+          const element = arry[index];
+          if(element == undefined || element == ""){
+               alert("Enter in all the fields provided")
+               return false
+          }else{
+               continue
+          }  
+     }
+     if(parseInt(Imodel.value) != Imodel.value){
+          CEEMmodel.hidden = false
+          setTimeout(() => {
+               CEEMmodel.hidden = true
+          }, 2000);
+          return false
+     }else{
+          if (Imodel.value.length != 4 || Imodel.value[0] == 0) {
+               CEEMIVmodel.hidden = false
+               setTimeout(() => {
+                    CEEMIVmodel.hidden = true
+               }, 3000);
+          }else{
+
+               if(parseInt(Imax.value) != Imax.value){
+                    CEEMmax.hidden = false
+                    setTimeout(() => {
+                         CEEMmax.hidden = true
+                    }, 2000);
+                    return false
+               }else{
+     
+                    if(parseInt(Imin.value) != Imin.value){
+                         CEEMmin.hidden = false
+                         setTimeout(() => {
+                              CEEMmin.hidden = true
+                         }, 2000);
+                         return false
+                    }else{
+     
+                         if(parseInt(Iquan.value) != Iquan.value){
+                              CEEMquan.hidden = false
+                              setTimeout(() => {
+                                   CEEMquan.hidden = true
+                              }, 2000)
+                              return false
+                         }else{
+                              return true
+                         }
+                    }
+               }
+          }
+     }
+}
+
+const populat2 = async()=>{
+     await axios.post('get/car',{
+          _id:CEserchinput.value
+     }).then((data)=>{
+          CEname.value = data.data[0].name
+          CEmodel.value = data.data[0].model 
+          CEmax.value = data.data[0].MaxPaylodeLimt
+          CEmin.value = data.data[0].minPaylodeLimt 
+          CEquan.value = data.data[0].instock
+     })
+}
+
+CEbutton.addEventListener('click', async()=>{
+    await populat2()
+})
+
+CECregister.addEventListener('click', async()=>{
+     const CEcardata = [CEname.value, CEmodel.value, CEmax.value, CEmin.value, CEquan.value]
+     const typecast = CEtypeCastCheck(CEcardata, CEmodel, CEmax, CEmin, CEquan)
+     if(typecast){
+          const fpu = parseInt(CEmax.value) * 0.5
+          if(CEmax.value != CEmin.value && parseInt(CEmin.value) < parseInt(CEmax.value) && parseInt(CEmin.value) >= fpu){
+               await axios.patch('/edit/car',{
+                    data:{
+                         name:CEname.value,
+                         model:parseInt(CEmodel.value),
+                         MaxPaylodeLimt:parseInt(CEmax.value),
+                         minPaylodeLimt:parseInt(CEmin.value),
+                         instock:parseInt(CEquan.value)
+                    },AddInfo:{
+                         _id:CEserchinput.value
+                    }
+               }).then(()=>{
+                    alert("car edited")
+               }) 
+          }else{
+               if(CEmax.value == CEmin.value){
+                    CEgErr.innerHTML = "The max and min value can not be the same"
+                    CEgErr.hidden = false
+                    setTimeout(() => {
+                         CEgErr.hidden = true
+                    }, 3000);
+               }else if (parseInt(min.value) > parseInt(max.value)) {
+                    CEgErr.innerHTML = "The min value cannot be grater than the max"
+                    CEgErr.hidden = false
+                    setTimeout(() => {
+                         CEgErr.hidden = true
+                    }, 3000);
+               } else {
+                    CEgErr.innerHTML = "The min value cannot be less than 50% of max value"
+                    CEgErr.hidden = false
+                    setTimeout(() => {
+                         CEgErr.hidden = true
+                    }, 3000);
+               }
+          }
+     }else{
+
+     }
+
+})
+
+//////////////////////////////////////////////////////////////////////////
+///////////// pro filr ///////////////////////////////////////////////////
+const test = document.getElementById('sebody')
+
+const propile = async (stat = "All", sort = "Name") =>{
+     if(stat = 'All'){
+          const {data:{staff, driver}} =  await axios.get('/quarySearch?status=All&sort=Name')
+          console.log(staff, driver);
+          var alldata = staff.map((data)=>{
+              const  {firstName, lastName, sex, DOB, subcity, Kabala, homeNum, status, imgPublicKey} = data
+
+              return `<div class="row  bodyRE mt-2 mb-2" style="padding: 10px 10px; border-radius: 10px; background-color: rgb(243 243 243); color: rgb(0,0,0);">
+              <div class="col-2" style="text-align: center;">
+                <img src="${imgPublicKey}" alt="img not found" width="90px" height="90px" style="border-radius:50px;">
+              </div>
+              <div class="col-3 ">
+                <div class="mt-1"><B>First Name:</B> ${firstName}</div>
+                <div class="mt-1"><B>Last Name:</B> ${lastName}</div>
+                <div class="mt-1"><B>Sex:</B> ${sex}</div>
+              </div>
+              <div class="col">
+                <div class="mt-1"><B>DOB:</B> ${DOB.split("T")[0]} </div>
+                <div class="mt-1"><B>Sub-City:</B> ${subcity} &nbsp; <B>Status:</B> ${status}</div>
+                <div class="mt-1"><B>Home Number:</B> ${homeNum} &nbsp; <B>Kabala:</B> ${Kabala}
+                  &nbsp; &nbsp; <a href="#" style="color: red;">Delete <i class="fa-solid fa-trash-can"></i></a>
+                  &nbsp; &nbsp; <a href="#">More <i class="fa-solid fa-circle-info"></i></a>
+                </div>
+              </div>
+            </div>`
+          }).join('')
+          alldata += `<small class="text-muted ml-4">Drivers</small><hr>`
+          alldata += driver.map((data)=>{
+               const  {firstName, lastName, sex, DOB, subcity, Kabala, homeNum, status, imgPublicKey} = data
+ 
+               return `<div class="row  bodyRE mt-2 mb-2" style="padding: 10px 10px; border-radius: 10px; background-color: rgb(243 243 243); color: rgb(0,0,0);">
+               <div class="col-2" style="text-align: center;">
+                 <img src="${imgPublicKey}" alt="img not found" width="90px" height="90px" style="border-radius:50px;">
+               </div>
+               <div class="col-3 ">
+                 <div class="mt-1"><B>First Name:</B> ${firstName}</div>
+                 <div class="mt-1"><B>Last Name:</B> ${lastName}</div>
+                 <div class="mt-1"><B>Sex:</B> ${sex}</div>
+               </div>
+               <div class="col">
+                 <div class="mt-1"><B>DOB:</B> ${DOB.split("T")[0]} </div>
+                 <div class="mt-1"><B>Sub-City:</B> ${subcity} &nbsp; <B>Status:</B> Drivers</div>
+                 <div class="mt-1"><B>Home Number:</B> ${homeNum} &nbsp; <B>Kabala:</B> ${Kabala}
+                   &nbsp; &nbsp; <a href="#" style="color: red;">Delete <i class="fa-solid fa-trash-can"></i></a>
+                   &nbsp; &nbsp; <a href="#">More <i class="fa-solid fa-circle-info"></i></a>
+                 </div>
+               </div>
+             </div>`
+           }).join('')
+          test.innerHTML = alldata
+     }
+}
+
+
+propile()
+
+
+
 
 
 

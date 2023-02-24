@@ -83,8 +83,7 @@ route.post('/get/:key', async(req, res)=>{
             if(key === "pro"){
                 const id = req.cookies.Token
                 const data= await users.findOne({_id:id})
-                const imgfile = await img.getimg(data.imgPublicKey)
-                res.status(200).json({imgfile,data})
+                res.status(200).json(data)
                 
     
             }else if (key === "staff") {
@@ -100,20 +99,6 @@ route.post('/get/:key', async(req, res)=>{
             }else if(key === "driver"){
                 const data = await driveres.find(req.body)
                 res.status(200).json(data)
-            }else if(key === "img"){
-                const id = req.body
-                const query = req.query.for
-                if(query === "dirver"){
-                    
-                    const {imgPublicKey} = await driveres.findOne(id) 
-                    const imgfile = await img.getimg(imgPublicKey)
-                    res.status(200).json(imgfile)
-                }
-                if(query === 'staff'){
-                    const {imgPublicKey} = await users.findOne(id) 
-                    const imgfile = await img.getimg(imgPublicKey)
-                    res.status(200).json(imgfile)
-                }
             }
         }
     } catch (error) {
@@ -123,9 +108,15 @@ route.post('/get/:key', async(req, res)=>{
 route.post('/Register/:key', async(req, res)=>{
         const key = req.params.key
         if (key === "staff"){
+
+            // const {data, imgname}= req.body
+            // const imguplod = await img.uplodImage(baceimgUri+imgname)
+            // data.imgPublicKey = imguplod
+            // const userinfo = users.create(data)
             const {data, imgname}= req.body
             const imguplod = await img.uplodImage(baceimgUri+imgname)
-            data.imgPublicKey = imguplod
+            const {url} = await img.getimg(imguplod)
+            data.imgPublicKey = url
             const userinfo = users.create(data)
         
         }else if (key === "driver") {
@@ -133,8 +124,9 @@ route.post('/Register/:key', async(req, res)=>{
             const {data, carpro, imgname} = req.body
             const car = await cars.findOne(carpro)
             const imguplod = await img.uplodImage(baceimgUri+imgname)
+            const {url} = await img.getimg(imguplod)
             data.carAs = car._id
-            data.imgPublicKey = imguplod
+            data.imgPublicKey = url
             const test = await driveres.create(data)
             await cars.updateOne({_id: car._id}, {instock: car.instock - 1})
             console.log(test);
@@ -172,12 +164,12 @@ route.patch('/edit/:key', async(req, res)=>{
         if(key){
             if(key == "staff"){
                 const {data, AddInfo} = req.body
-                await users.updateOne(AddInfo,data)
+                await users.updateOne(AddInfo, data)
                 res.status(200).send("seccess")
             }else if (key == "dirver") {
                 const {data, AddInfo} = req.body
                 const {carAs: Ocar} = await driveres.findOne({_id: AddInfo.user_id})
-                
+
                 const {_id: Ncar, instock:Nst} = await cars.findOne({name:AddInfo.carname, model:AddInfo.carmodel})
                 await cars.updateOne({_id:Ncar}, {instock: Nst-1})
 
@@ -185,13 +177,44 @@ route.patch('/edit/:key', async(req, res)=>{
                 await cars.updateOne({_id: Ocar}, {instock:instock+1})
                 data.carAs = Ncar
                 const test = await driveres.updateOne({_id:AddInfo.user_id},data)
-
+                res.status(200).send("seccess")
                 console.log(data);
                 
+            }else if(key == "car"){
+                console.log(req.body);
+                const {data, AddInfo} = req.body
+                await cars.updateOne(AddInfo, data)
+                res.status(200).send("seccess")
             }
         }
     } catch (error) {
         res.status(404).send("err")
+    }
+})
+
+route.get('/quarySearch', async(req, res)=>{
+    try {
+        const {status, sort} = req.query
+        if (status == "All") {
+            if(sort === "Name"){
+                await users.find().sort({firstName:0, lastName:0}).then(
+                    async(staff)=>{
+                        await driveres.find().sort({firstName:0, lastName:0}).then(
+                            async(driver)=>{
+                                res.status(200).json({staff, driver}) 
+                            })
+                            .catch((err)=>{
+                                res.status(404).send("Canceld")
+                            })
+                    
+                    }).catch((err)=>{
+                        res.status(404).send("Canceld")
+                    })
+
+            }
+        }
+    } catch (error) {
+        console.log(error);
     }
 })
 module.exports = route
